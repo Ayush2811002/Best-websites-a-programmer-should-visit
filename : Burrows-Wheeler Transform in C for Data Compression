@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <string.h>
+
+// Structure to store cyclic rotations
+struct rotation {
+    char* str;
+    int index;
+};
+
+// Comparison function for sorting rotations
+int compare(const void* a, const void* b) {
+    return strcmp(((struct rotation*)a)->str, ((struct rotation*)b)->str);
+}
+
+// Function to perform the Burrows-Wheeler Transform
+char* burrowsWheelerTransform(char* text) {
+    int length = strlen(text);
+    struct rotation rotations[length];
+    
+    // Create all cyclic rotations of the text
+    for (int i = 0; i < length; i++) {
+        rotations[i].str = text + i;
+        rotations[i].index = i;
+    }
+    
+    // Sort the rotations lexicographically
+    qsort(rotations, length, sizeof(struct rotation), compare);
+    
+    // Extract the last character of each rotation to form the BWT
+    char* bwt = (char*)malloc(length * sizeof(char));
+    for (int i = 0; i < length; i++) {
+        int j = (rotations[i].index - 1 + length) % length;
+        bwt[i] = rotations[j].str[length - 1];
+    }
+    return bwt;
+}
+
+int main() {
+    char text[] = "banana$";  // Add '$' as an end marker
+    char* bwt = burrowsWheelerTransform(text);
+    printf("Burrows-Wheeler Transform: %s\n", bwt);
+    free(bwt);
+    return 0;
+}
